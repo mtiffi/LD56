@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
 {
 
     private Rigidbody2D rig;
-    private bool dead;
+    private bool dead, started;
     public float speed, flapSpeed, maxSpeed;
     public GameObject jumpLight;
     // Start is called before the first frame update
@@ -23,7 +23,13 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (dead)
+        if (!started && Input.GetKeyDown(KeyCode.Space))
+        {
+            started = true;
+            GameObject.Find("StartText").GetComponent<TextMeshProUGUI>().text = "";
+
+        }
+        if (dead || !started)
         {
             rig.velocity = Vector2.zero;
             return;
@@ -32,6 +38,8 @@ public class PlayerController : MonoBehaviour
         {
             rig.velocity = new Vector2(rig.velocity.x, 1 * flapSpeed);
             Instantiate(jumpLight, transform.position, Quaternion.identity);
+
+
         }
 
         if (Input.GetKey(KeyCode.A) && rig.velocity.x > -maxSpeed)
@@ -51,6 +59,22 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Wall"))
         {
             GameObject.Find("DiedText").GetComponent<TextMeshProUGUI>().text = "YOU DIED";
+            GameObject.Find("RestartText").GetComponent<TextMeshProUGUI>().text = "Hold R to Restart";
+
+            dead = true;
+            GetComponentInChildren<Light2D>().intensity = 0;
+            GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("End"))
+        {
+            GameObject.Find("DiedText").GetComponent<TextMeshProUGUI>().text = "YOU WIN";
+            GameObject.Find("RestartText").GetComponent<TextMeshProUGUI>().text = "Hold R to Restart";
+
             dead = true;
             GetComponentInChildren<Light2D>().intensity = 0;
             GetComponent<SpriteRenderer>().enabled = false;
